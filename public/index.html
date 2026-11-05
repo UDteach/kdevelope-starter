@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="作りたいものに合う技術と作例を選び、調査や制作を頼むプロンプトにまとめます。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://kdevelope.pages.dev; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>制作スタックを組む — kdevelope</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">本文へ</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="https://kdevelope.pages.dev/">kdevelope<span>.</span></a>
+    <nav aria-label="サイト">
+      <a href="https://kdevelope.pages.dev/">道具を探す</a>
+      <a href="https://kdevelope.pages.dev/experiments">作例を見る</a>
+      <a href="https://github.com/UDteach/kdevelope-starter">スターターをcloneする ↗</a>
+    </nav>
+  </header>
+  <main id="main" class="wrap">
+    <h1>制作スタックを組む</h1>
+    <p class="intro">目的に合う道具と作例を選び、制作を頼む指示にまとめます。</p>
+    <nav aria-label="制作のステップ" id="steps">
+      <ol>
+        <li><button type="button" data-step="1" aria-current="step"><b>1</b> 作りたいもの</button></li>
+        <li><button type="button" data-step="2" disabled><b>2</b> 候補と作例</button></li>
+        <li><button type="button" data-step="3" disabled><b>3</b> 画像で壁打ち <small>任意</small></button></li>
+        <li><button type="button" data-step="4" disabled><b>4</b> 制作プロンプト</button></li>
+      </ol>
+    </nav>
+    <p id="loading" role="status">候補を読み込んでいます。</p>
+    <div id="load-error" hidden><p role="alert">候補を読み込めませんでした。ページを再読み込みしてください。</p></div>
+    <noscript><p>このページを使うにはJavaScriptを有効にしてください。</p></noscript>
+
+    <section id="step-1" aria-labelledby="purpose-title" hidden>
+      <div class="narrow">
+        <h2 id="purpose-title" tabindex="-1">作りたいものを決める</h2>
+        <form id="purpose-form">
+          <label for="goal">何を作りますか？</label>
+          <textarea id="goal" rows="3" maxlength="1600" required placeholder="例　ピクセル素材と再現手順を見られるギャラリー"></textarea>
+          <button id="use-example" class="text-action" type="button">ギャラリーの見本を入れる</button>
+          <label for="purpose">作るものの種類</label>
+          <select id="purpose">
+            <option value="site">作品サイト・ブログ</option><option value="app">Webアプリ</option>
+            <option value="art">画像・動画</option><option value="writing">文章・制作手順</option>
+          </select>
+          <fieldset id="web-needs">
+            <legend>Webで使う範囲</legend>
+            <div class="fields">
+              <div><label for="host">公開先の希望</label><select id="host"><option value="auto">目的から候補を出す</option><option value="local">ローカルで試作</option><option value="pages">Cloudflare Pages</option><option value="workers">Cloudflare Workers</option><option value="vercel">Vercel</option></select></div>
+              <div><label for="storage">データの保存範囲</label><select id="storage"><option value="none">保存は不要</option><option value="local">この端末に保存</option><option value="shared">端末間で共有</option></select></div>
+            </div>
+            <label class="check"><input id="api" type="checkbox"> サーバー側の処理がある（API・送信フォームなど）</label>
+            <label class="check"><input id="login" type="checkbox"> 利用者のログインがある</label>
+          </fieldset>
+          <div class="actions"><button class="primary" type="submit">候補と作例へ →</button></div>
+        </form>
+      </div>
+    </section>
+
+    <section id="step-2" aria-labelledby="tools-title" hidden>
+      <h2 id="tools-title" tabindex="-1">候補と作例</h2>
+      <p class="goal-line" id="goal-summary"></p>
+      <div class="columns">
+        <div class="candidate-pane">
+          <div id="recommendation" class="recommendation"></div>
+          <h3>候補を探す</h3>
+          <div class="tabs" role="group" aria-label="候補の種類">
+            <button type="button" data-source="catalog" aria-pressed="true">kdevelope</button>
+            <button type="button" data-source="github" aria-pressed="false">GitHub OSS</button>
+            <button type="button" data-source="examples" aria-pressed="false">作例</button>
+          </div>
+          <label class="sr-only" for="search">候補を検索</label><input type="search" id="search" placeholder="名前・用途で探す" maxlength="160">
+          <div id="tool-filters" class="filters">
+            <label class="sr-only" for="role-filter">役割</label><select id="role-filter"><option value="">すべての役割</option></select>
+            <label class="sr-only" for="sort">並び順</label><select id="sort"><option value="fit">目的に合う順</option><option value="stars">スターが多い順</option><option value="recent">Trending掲載を先に</option></select>
+          </div>
+          <div id="example-filters" hidden><label class="sr-only" for="example-group">作例の種類</label><select id="example-group"><option value="">すべての作例</option><option value="art">絵・画像</option><option value="skills">Skills・ツール</option></select></div>
+          <label id="paid-filter" class="check"><input id="show-paid" type="checkbox"> 有料候補も表示</label>
+          <div id="candidate-list" class="candidate-list"></div>
+          <div id="pager" class="pager" aria-label="候補のページ"></div>
+        </div>
+        <div class="stack-pane">
+          <h3>選んだスタック</h3>
+          <div id="stack"></div>
+          <div id="scope-notes"></div>
+          <div id="reference-list"></div>
+          <div id="comparison-list"></div>
+          <section class="form-block" aria-labelledby="research-title">
+            <h3 id="research-title">調べてほしいこと</h3>
+            <label class="check"><input id="research" type="checkbox"> 調査の指示をプロンプトに入れる</label>
+            <label class="sr-only" for="question">調べてほしい内容</label>
+            <textarea id="question" rows="2" maxlength="1200" placeholder="例　無料・登録なしで使える画像軽量化ツールを比較" hidden></textarea>
+          </section>
+        </div>
+      </div>
+      <div class="actions split">
+        <button type="button" data-go="1">作りたいものに戻る</button>
+        <div><button type="button" data-go="4">制作プロンプトへ</button><button class="primary" type="button" data-go="3">画像で壁打ちへ →</button></div>
+      </div>
+    </section>
+
+    <section id="step-3" aria-labelledby="image-title" hidden>
+      <div class="narrow">
+        <h2 id="image-title" tabindex="-1">画像で方向を相談する</h2>
+        <p>作例と条件を添えた相談用プロンプトをコピーし、使うAIに貼り付けます。</p>
+        <fieldset class="assistant-picker"><legend>渡し先</legend><label class="check"><input name="assistant" value="Codex" type="radio" checked> Codex</label><label class="check"><input name="assistant" value="Gemini" type="radio"> Gemini</label></fieldset>
+        <label for="image-prompt">画像で壁打ちするプロンプト</label>
+        <textarea id="image-prompt" class="output" rows="9" readonly></textarea>
+        <button type="button" class="primary" data-copy="image-prompt">画像用プロンプトをコピー</button>
+        <label for="direction">画像で決めた方向 <small>任意</small></label>
+        <textarea id="direction" rows="3" maxlength="1600" placeholder="例　2案目の配置を採用。作例の絵を大きく、再現手順は別タブへ。"></textarea>
+        <div class="actions split"><button type="button" data-go="2">候補と作例に戻る</button><button class="primary" type="button" data-go="4">制作プロンプトへ →</button></div>
+      </div>
+    </section>
+
+    <section id="step-4" aria-labelledby="prompt-title" hidden>
+      <div class="narrow">
+        <h2 id="prompt-title" tabindex="-1">制作プロンプト</h2>
+        <p>必須・任意の道具、参考作例、調査内容をまとめました。</p>
+        <label class="sr-only" for="build-prompt">制作プロンプトの本文</label>
+        <textarea id="build-prompt" class="output" rows="15" readonly></textarea>
+        <div class="actions"><button type="button" class="primary" data-copy="build-prompt">制作プロンプトをコピー</button><button type="button" id="download">Markdownで保存</button></div>
+        <div class="actions split"><button type="button" data-go="2">候補と作例に戻る</button><button type="button" data-go="3">画像で壁打ちする</button></div>
+      </div>
+    </section>
+    <p id="notice" role="status" aria-live="polite"></p>
+  </main>
+  <footer class="wrap"><p>kdevelope · 下書きはこのタブ内に保存します。</p></footer>
+  <dialog id="example-dialog" aria-labelledby="example-title">
+    <div class="dialog-header"><h2 id="example-title"></h2><form method="dialog"><button type="submit">閉じる</button></form></div>
+    <div id="example-body"></div>
+  </dialog>
+</body>
+</html>

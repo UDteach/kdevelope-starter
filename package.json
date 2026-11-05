@@ -1,0 +1,13 @@
+{
+  "name": "kdevelope-starter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test",
+    "catalog": "node scripts/catalog.mjs",
+    "sync": "node scripts/sync.mjs"
+  }
+}
