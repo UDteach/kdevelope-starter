@@ -41,7 +41,12 @@ function external(text, value) {
 }
 
 function save() {
-  try { sessionStorage.setItem(storageKey, JSON.stringify(draft)); } catch { /* Works without draft storage. */ }
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify(draft));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function restore() {
@@ -65,6 +70,30 @@ function restore() {
 }
 
 function say(text) { $('#notice').textContent = text; }
+
+function acceptHandoff(url) {
+  const messages = [];
+  if (url.searchParams.has('tool')) {
+    const tool = tools.get(url.searchParams.get('tool'));
+    if (tool) {
+      addSelection(draft, tool, tool.scope, 'optional');
+      const destination = tool.price === 'paid' ? '比較候補' : '選んだスタック';
+      messages.push(`${tool.name}を${destination}に引き継ぎました。`);
+    } else {
+      messages.push('指定された道具は候補に見つかりませんでした。');
+    }
+  }
+  if (url.searchParams.has('example')) {
+    const example = examples.get(url.searchParams.get('example'));
+    if (example) {
+      if (!draft.references.includes(example.id)) draft.references.push(example.id);
+      messages.push(`「${example.title}」を参考作例に引き継ぎました。`);
+    } else {
+      messages.push('指定された作例は見つかりませんでした。');
+    }
+  }
+  return messages.join(' ');
+}
 
 function syncForm() {
   for (const id of ['goal', 'purpose', 'host', 'storage', 'question', 'direction']) $(`#${id}`).value = draft[id];
@@ -97,8 +126,9 @@ function go(step, focus = true) {
   if (step === 3) $('#image-prompt').value = makePrompt(draft, tools, examples, 'image');
   if (step === 4) $('#build-prompt').value = makePrompt(draft, tools, examples);
   say('');
-  save();
+  $('#handoff').textContent = '';
   if (focus) $(`#step-${step} h2`).focus();
+  return save();
 }
 
 function renderRecommendations() {
@@ -411,10 +441,20 @@ try {
   tools = new Map(catalog.tools.map(tool => [tool.id, tool]));
   examples = new Map(catalog.examples.map(example => [example.id, example]));
   restore();
+  const url = new URL(location.href);
+  const message = acceptHandoff(url);
   syncForm();
   connectControls();
   $('#loading').hidden = true;
-  go(draft.step, false);
+  const saved = go(message && draft.goal.trim() ? 2 : draft.step, Boolean(message));
+  if (message) {
+    $('#handoff').textContent = message;
+    if (saved) {
+      url.searchParams.delete('tool');
+      url.searchParams.delete('example');
+      history.replaceState(history.state, '', url);
+    }
+  }
 } catch (error) {
   $('#loading').hidden = true;
   $('#load-error').hidden = false;

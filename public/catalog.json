@@ -1239,7 +1239,9 @@
         "license": "MIT",
         "openSource": true
       },
-      "exampleIds": []
+      "exampleIds": [
+        "shoogle-accordion-workflow"
+      ]
     },
     {
       "id": "R87",

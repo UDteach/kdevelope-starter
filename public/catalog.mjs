@@ -72,7 +72,9 @@ export function buildCatalog(content, experiments, { localAssets = false } = {})
     priceLabel: item.pricing.label,
     url: publicUrl(item.url),
     repository: item.repository || null,
-    exampleIds: experiments.cases.filter(c => c.resourceIds.includes(item.id)).map(c => c.id)
+    exampleIds: experiments.cases
+      .filter(c => c.resourceIds.includes(item.id) || item.stack?.exampleIds?.includes(c.id))
+      .map(c => c.id)
   }));
   for (const [id, name, role, url, use, scope, priceLabel] of platforms) {
     tools.push({ id, name, role, url, use, scope, priceLabel, price: 'unknown', exampleIds: [] });

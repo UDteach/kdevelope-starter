@@ -25,6 +25,7 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.45rem); line-height: 1.25; }
 h2 { font-size: 1.55rem; margin-bottom: 8px; }
 h3 { font-size: 1.12rem; }
 .intro { margin-top: 8px; color: var(--muted); }
+#handoff:not(:empty) { margin: 14px 0; color: var(--blue); overflow-wrap: anywhere; }
 button, select, input, textarea { font: inherit; color: inherit; }
 button, select { min-height: 44px; background: #fff; border: 1px solid #a6b2be; border-radius: 5px; padding: 6px 12px; }
 button { cursor: pointer; }
