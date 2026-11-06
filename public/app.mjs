@@ -1,11 +1,20 @@
 import { roles } from './catalog.mjs';
 import { addSelection, blankDraft, findTools, isWeb, makePrompt, purposes, recommendations, scopeNotes } from './planner.mjs';
+import { svgIcon, toolIcon } from './icons.mjs';
 
 const $ = selector => document.querySelector(selector);
 const storageKey = 'kdevelope-compose-v1';
 const pageSize = 6;
-const roleIcons = { frontend: '▱', hosting: '☁', database: '▤', writing: 'あ', image: '▦', motion: '▶',
-  style: '◐', ui: '□', build: '▣', language: '型', api: '↔', fetch: '↓', search: '⌕', test: '✓', general: '◇' };
+const stackExamples = {
+  gallery: { summary: '作品と作り方を並べ、URLを渡して見てもらう構成。',
+    settings: { goal: 'ピクセル素材と再現手順を見られるギャラリー', purpose: 'site', storage: 'none' },
+    uses: { R80: '作品の一覧と、作り方のページをつくる。', 'cloudflare-pages': 'ページと画像を配信し、URLで見られるようにする。' } },
+  shared: { summary: 'PCで書いたメモを、スマホでも開いて編集できる構成。',
+    settings: { goal: 'PCとスマホの両方から制作メモを書き足せるWebアプリ', purpose: 'app', storage: 'shared' },
+    uses: { R74: 'メモを書く画面と、保存したメモの一覧をつくる。',
+      'cloudflare-workers': '画面を公開し、メモを保存・取得するリクエストを受ける。',
+      'cloudflare-d1': 'PCやスマホから読むメモを、ひとつのデータベースに保存する。' } }
+};
 const stackGroups = [
   { label: '制作', path: 'M4 4h16v13H4z M8 21h8 M12 17v4' },
   { label: '処理・保存', path: 'M5 6a7 3 0 0 0 14 0a7 3 0 0 0-14 0v12a7 3 0 0 0 14 0V6 M5 12a7 3 0 0 0 14 0' },
@@ -18,6 +27,7 @@ let draft = structuredClone(blankDraft);
 let tools;
 let examples;
 let exampleOpener;
+let stackExample = 'gallery';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -137,18 +147,37 @@ function go(step, focus = true) {
   return save();
 }
 
+function technologyRows(suggestions) {
+  return suggestions.map(item => {
+    const tool = tools.get(item.id);
+    const row = element('li', undefined, 'technology-row');
+    const description = element('div');
+    const title = element('div', undefined, 'technology-title');
+    const role = tool.id === 'cloudflare-workers' ? 'API・公開' : roles[tool.role];
+    title.append(element('strong', tool.name), element('small', role));
+    description.append(title, element('p', item.reason));
+    row.append(toolIcon(tool), description);
+    return row;
+  });
+}
+
+function renderStackExample() {
+  const example = stackExamples[stackExample];
+  $('#stack-example-summary').textContent = example.summary;
+  const suggestions = recommendations({ ...blankDraft, ...example.settings }).filter(item => tools.has(item.id));
+  $('#stack-example-tools').replaceChildren(...technologyRows(suggestions.map(item => ({ ...item, reason: example.uses[item.id] ?? item.reason }))));
+  document.querySelectorAll('[data-stack-example]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.stackExample === stackExample));
+  });
+}
+
 function renderRecommendations() {
   const panel = $('#recommendation');
   const suggestions = recommendations(draft).filter(item => tools.has(item.id));
   panel.hidden = suggestions.length === 0;
   if (panel.hidden) return;
-  const list = element('ul');
-  for (const item of suggestions) {
-    const tool = tools.get(item.id);
-    const row = element('li');
-    row.append(element('strong', tool.name), document.createTextNode(`　${item.reason}`));
-    list.append(row);
-  }
+  const list = element('ul', undefined, 'intro-tools');
+  list.append(...technologyRows(suggestions));
   const apply = action('この構成を追加', () => {
     for (const item of suggestions) addSelection(draft, tools.get(item.id), item.scope, item.mode);
     updateChoices('目的に合う構成を追加しました。');
@@ -206,7 +235,9 @@ function toolRow(tool) {
   const metadata = [roles[tool.role], tool.priceLabel];
   if (tool.repository) metadata.push(`★ ${tool.repository.stars.toLocaleString('ja-JP')}（${tool.repository.checkedOn}確認）`);
   if (tool.repository?.trending) metadata.push('GitHub Trending掲載');
-  copy.append(element('h4', tool.name), element('p', tool.use), element('p', metadata.join(' · '), 'meta'));
+  const name = element('h4', undefined, 'tool-title');
+  name.append(toolIcon(tool), element('span', tool.name));
+  copy.append(name, element('p', tool.use), element('p', metadata.join(' · '), 'meta'));
   const paid = tool.price === 'paid';
   const added = paid ? draft.comparison.includes(tool.id) : draft.selected.some(s => s.id === tool.id);
   const button = action(added ? '追加済み' : paid ? '比較に追加' : '追加', () => {
@@ -242,17 +273,6 @@ function exampleRow(example) {
   return row;
 }
 
-function groupIcon(path) {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('aria-hidden', 'true');
-  const lines = document.createElementNS(ns, 'path');
-  lines.setAttribute('d', path);
-  svg.append(lines);
-  return svg;
-}
-
 function renderStackOverview(groups) {
   const overview = $('#stack-overview');
   overview.replaceChildren();
@@ -263,14 +283,12 @@ function renderStackOverview(groups) {
   for (const [i, group] of stackGroups.entries()) {
     const stage = element('li', undefined, 'stack-stage');
     const heading = element('div', undefined, 'stack-stage-title');
-    heading.append(groupIcon(group.path), element('span', group.label));
+    heading.append(svgIcon(group.path), element('span', group.label));
     stage.append(heading);
     if (!groups[i].length) stage.append(element('p', '未選択', 'meta'));
     for (const { tool, card } of groups[i]) {
       const button = action(tool.name, () => card.focus(), 'stack-jump');
-      const icon = element('span', roleIcons[tool.role], 'stack-jump-icon');
-      icon.setAttribute('aria-hidden', 'true');
-      button.prepend(icon);
+      button.prepend(toolIcon(tool));
       stage.append(button);
     }
     stages.append(stage);
@@ -294,8 +312,8 @@ function renderStack() {
     card.tabIndex = -1;
     groups[stackGroupFor[tool.role] ?? 0].push({ tool, card });
     const row = element('div', undefined, 'stack-row');
-    const icon = element('span', roleIcons[tool.role], 'role-icon');
-    icon.setAttribute('aria-hidden', 'true');
+    const icon = toolIcon(tool);
+    icon.classList.add('role-icon');
     const name = element('div', undefined, 'stack-name');
     const currentScope = element('small', `${roles[tool.role]} · ${item.scope || tool.scope}`);
     name.append(element('strong', tool.name), currentScope);
@@ -431,17 +449,22 @@ function connectControls() {
       save();
     });
   }
+  document.querySelectorAll('[data-stack-example]').forEach(button => button.addEventListener('click', () => {
+    stackExample = button.dataset.stackExample;
+    renderStackExample();
+  }));
+  renderStackExample();
   $('#use-example').addEventListener('click', () => {
-    draft.goal = 'ピクセル素材と再現手順を見られるギャラリー';
-    draft.purpose = 'site';
-    draft.host = 'auto';
-    draft.storage = 'none';
-    draft.api = false;
-    draft.login = false;
+    const { goal, purpose, storage } = stackExamples[stackExample].settings;
+    Object.assign(draft, { purpose, storage, host: 'auto', api: false, login: false });
+    if (!draft.goal.trim()) draft.goal = goal;
     syncForm();
     renderNav();
     save();
+    $('#goal').focus();
+    say('見本の設定を入力しました。');
   });
+  $('#write-goal').addEventListener('click', event => { event.preventDefault(); $('#goal').focus(); });
   $('#purpose-form').addEventListener('submit', event => { event.preventDefault(); go(2); });
   document.querySelectorAll('[data-step], [data-go]').forEach(button => button.addEventListener('click', () => go(Number(button.dataset.step || button.dataset.go))));
   document.querySelectorAll('[data-source]').forEach(button => button.addEventListener('click', () => {

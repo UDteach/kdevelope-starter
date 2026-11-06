@@ -29,3 +29,7 @@ kdevelope本体では、道具の詳細から選択中のスタックへ、ギ�
 - kdevelope本体を管理する場合は、スターターで `npm run sync -- <kdevelope本体のディレクトリ>` を実行すると、確認した画面のソースを本体へ反映できます。
 
 下書きは現在のブラウザータブに保存されます。画像生成・検索・制作は、利用者がコピーしたプロンプトを貼り付けた先で行います。プレビュー画像と詳細リンクはkdevelopeの公開作例を参照します。各ツールや作例の素材には配布元の条件が適用されます。
+
+## アイコンの出典
+
+`public/icons.mjs` の Astro、React、Svelte、Vite、shadcn/ui、Hono のパスは、[Simple Icons 16.36.0](https://github.com/simple-icons/simple-icons/tree/16.36.0/icons) の各SVGから取得しています。Simple Iconsの[ライセンス](https://github.com/simple-icons/simple-icons/blob/16.36.0/LICENSE.md)と[個々のロゴについての案内](https://github.com/simple-icons/simple-icons/blob/16.36.0/DISCLAIMER.md)を参照してください。ロゴは各技術の識別に使用します。公開・処理・保存・検索などの役割には、この画面用のアイコンを使います。

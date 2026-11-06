@@ -9,7 +9,7 @@ if (pkg.name !== 'kdevelope') throw new Error('Expected the kdevelope site repos
 
 const target = resolve(root, 'public/compose');
 await mkdir(target, { recursive: true });
-for (const name of ['index.html', 'style.css', 'favicon.svg', 'catalog.mjs', 'planner.mjs', 'app.mjs']) {
+for (const name of ['index.html', 'style.css', 'favicon.svg', 'catalog.mjs', 'planner.mjs', 'app.mjs', 'icons.mjs']) {
   await copyFile(new URL(`../public/${name}`, import.meta.url), resolve(target, name));
 }
 console.log('kdevelope の公開画面へ制作スタックのソースを反映しました。');

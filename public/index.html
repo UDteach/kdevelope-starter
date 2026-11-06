@@ -38,12 +38,26 @@
     <noscript><p>このページを使うにはJavaScriptを有効にしてください。</p></noscript>
 
     <section id="step-1" aria-labelledby="purpose-title" hidden>
-      <div class="narrow">
-        <h2 id="purpose-title" tabindex="-1">作りたいものを決める</h2>
-        <form id="purpose-form">
+      <h2 id="purpose-title" tabindex="-1">作りたいものを決める</h2>
+      <div class="purpose-layout">
+        <section class="stack-intro" aria-labelledby="stack-intro-title">
+          <h3 id="stack-intro-title">技術スタックの見本</h3>
+          <div class="intro-switch" role="group" aria-label="構成例を選ぶ">
+            <button type="button" data-stack-example="gallery" aria-pressed="true">作品集</button>
+            <button type="button" data-stack-example="shared" aria-pressed="false">共有メモ</button>
+          </div>
+          <div class="intro-result" aria-live="polite">
+            <p id="stack-example-summary"></p>
+            <ul class="intro-tools" id="stack-example-tools"></ul>
+          </div>
+          <div class="intro-actions">
+            <button type="button" id="use-example">この見本で始める</button>
+            <a href="#goal" id="write-goal">自分で入力する</a>
+          </div>
+        </section>
+        <form id="purpose-form" class="narrow">
           <label for="goal">何を作りますか？</label>
           <textarea id="goal" rows="3" maxlength="1600" required placeholder="例　ピクセル素材と再現手順を見られるギャラリー"></textarea>
-          <button id="use-example" class="text-action" type="button">ギャラリーの見本を入れる</button>
           <label for="purpose">作るものの種類</label>
           <select id="purpose">
             <option value="site">作品サイト・ブログ</option><option value="app">Webアプリ</option>
@@ -102,7 +116,7 @@
       </div>
       <div class="actions split">
         <button type="button" data-go="1">作りたいものに戻る</button>
-        <div><button type="button" data-go="4">制作プロンプトへ</button><button class="primary" type="button" data-go="3">画像で壁打ちへ →</button></div>
+        <div><button type="button" data-go="3">画像で壁打ち（任意）</button><button class="primary" type="button" data-go="4">制作プロンプトへ</button></div>
       </div>
     </section>
 
