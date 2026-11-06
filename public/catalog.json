@@ -1373,6 +1373,195 @@
       "exampleIds": []
     },
     {
+      "id": "R93",
+      "name": "MiniSearch",
+      "role": "search",
+      "use": "ブラウザーで作例や記事の本文を検索する。",
+      "scope": "日本語の単語に分けて手順を索引にする。",
+      "conditions": "日本語の分割にはIntl.Segmenterを使用。結果は今回の10件と検索語で確認した。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://lucaong.github.io/minisearch/",
+      "repository": {
+        "url": "https://github.com/lucaong/minisearch",
+        "stars": 6191,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "oss-minisearch-recipes"
+      ]
+    },
+    {
+      "id": "R94",
+      "name": "shadcn-svelte",
+      "role": "ui",
+      "use": "SvelteのUI部品を取り込み、自分の画面に合わせて編集する。",
+      "scope": "固定版Accordionを取り込み、開閉できる形にする。",
+      "conditions": "対象はAccordionの1部品。見た目は作例のCSS、部品の動きはBits UIが担当。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://www.shadcn-svelte.com/docs/components/accordion",
+      "repository": {
+        "url": "https://github.com/huntabyte/shadcn-svelte",
+        "stars": 9243,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "oss-shadcn-svelte-faq"
+      ]
+    },
+    {
+      "id": "R95",
+      "name": "MSW",
+      "role": "test",
+      "use": "通信の応答を差し替え、画面の状態を再現する。",
+      "scope": "遅延・0件・503・再試行成功の応答を用意する。",
+      "conditions": "モック用Service Workerの範囲はこの作例のディレクトリ。試すにはHTTPSかlocalhostで開く。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://mswjs.io/docs/",
+      "repository": {
+        "url": "https://github.com/mswjs/msw",
+        "stars": 18335,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "oss-msw-retry"
+      ]
+    },
+    {
+      "id": "R96",
+      "name": "BudouX",
+      "role": "writing",
+      "use": "日本語の見出しを、意味のまとまりに沿って改行する。",
+      "scope": "BudouXの区切りを表示に使う。",
+      "conditions": "改行位置は画面幅とフォントに依存する。日本語の索引づくりには別の分割を使う。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://github.com/google/budoux",
+      "repository": {
+        "url": "https://github.com/google/budoux",
+        "stars": 1810,
+        "checkedOn": "2026-11-06",
+        "license": "Apache-2.0",
+        "openSource": true
+      },
+      "exampleIds": [
+        "oss-budoux-wrap"
+      ]
+    },
+    {
+      "id": "R97",
+      "name": "Yjs",
+      "role": "database",
+      "use": "共同編集で別々に入った変更を合流させる。",
+      "scope": "更新データを互いに適用する。",
+      "conditions": "2つの文書は同じ画面内で実行。ネットワーク同期・認証・永続保存は別に検証する。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://docs.yjs.dev/",
+      "repository": {
+        "url": "https://github.com/yjs/yjs",
+        "stars": 23026,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "oss-yjs-merge"
+      ]
+    },
+    {
+      "id": "R98",
+      "name": "SVGO",
+      "role": "image",
+      "use": "SVGの構造を整理してファイルを軽くする。",
+      "scope": "CLIで最適化する。",
+      "conditions": "描画の一致は画像ごとに確認する。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://svgo.dev/docs/usage/",
+      "repository": {
+        "url": "https://github.com/svg/svgo",
+        "stars": 22794,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "svgo-optimize"
+      ]
+    },
+    {
+      "id": "R99",
+      "name": "Piskel",
+      "role": "image",
+      "use": "ブラウザーでドット絵とコマ画像を編集する。",
+      "scope": "片方を回転し、シートとGIFを出す。",
+      "conditions": "ブラウザーの編集・保存を確認。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://www.piskelapp.com/",
+      "repository": {
+        "url": "https://github.com/piskelapp/piskel",
+        "stars": 12956,
+        "checkedOn": "2026-11-06",
+        "license": "Apache-2.0",
+        "openSource": true
+      },
+      "exampleIds": [
+        "piskel"
+      ]
+    },
+    {
+      "id": "R100",
+      "name": "Excalidraw",
+      "role": "general",
+      "use": "箱・矢印・文字を使って制作の流れを描く。",
+      "scope": "箱と矢印を描いて出力する。",
+      "conditions": "実行記録はクリップボード経由。ネイティブ形式の保存は別に確認する。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://excalidraw.com/",
+      "repository": {
+        "url": "https://github.com/excalidraw/excalidraw",
+        "stars": 135211,
+        "checkedOn": "2026-11-06",
+        "license": "MIT",
+        "openSource": true
+      },
+      "exampleIds": [
+        "excalidraw"
+      ]
+    },
+    {
+      "id": "R101",
+      "name": "Squoosh",
+      "role": "image",
+      "use": "画質を見比べながらブラウザーで画像を圧縮する。",
+      "scope": "WebPへ変換して容量と色を比較する。",
+      "conditions": "容量と色差は画像と設定ごとに変わる。",
+      "price": "free",
+      "priceLabel": "無料・OSS",
+      "url": "https://squoosh.app/",
+      "repository": {
+        "url": "https://github.com/GoogleChromeLabs/squoosh",
+        "stars": 26148,
+        "checkedOn": "2026-11-06",
+        "license": "Apache-2.0",
+        "openSource": true
+      },
+      "exampleIds": [
+        "squoosh"
+      ]
+    },
+    {
       "id": "html-css",
       "name": "HTML / CSS",
       "role": "frontend",
@@ -1512,6 +1701,111 @@
     }
   ],
   "examples": [
+    {
+      "id": "oss-minisearch-recipes",
+      "title": "作例の再現手順まで日本語で探す",
+      "group": "skills",
+      "summary": "「Effort4」は題名・概要・道具名で0件、手順本文でSquooshの作例が1件。「青緑フレーム」でPiskelの作例も見つかった。",
+      "scope": "登録なしのローカル試作",
+      "tools": [
+        "MiniSearch"
+      ],
+      "url": "https://kdevelope.pages.dev/experiments?view=skills#oss-minisearch-recipes",
+      "before": {
+        "type": "text",
+        "text": "検索語 Effort4\n題名・概要・道具名の一致は0件。",
+        "label": "試す前"
+      },
+      "after": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/search.png",
+        "label": "実行結果"
+      }
+    },
+    {
+      "id": "oss-shadcn-svelte-faq",
+      "title": "shadcn-svelteでFAQを開閉する",
+      "group": "skills",
+      "summary": "Enterで開き、矢印で次へ移動。Spaceで切り替え、同時に開く回答は1件。締め切った項目は無効化。",
+      "scope": "登録なしのローカル試作",
+      "tools": [
+        "shadcn-svelte"
+      ],
+      "url": "https://kdevelope.pages.dev/experiments?view=skills#oss-shadcn-svelte-faq",
+      "before": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/faq-before.png",
+        "label": "試す前の表示"
+      },
+      "after": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/faq-after.png",
+        "label": "実行結果"
+      }
+    },
+    {
+      "id": "oss-msw-retry",
+      "title": "通信失敗と再試行を同じ画面で比べる",
+      "group": "skills",
+      "summary": "読込中、0件、503と再試行後の2件表示を、ブラウザーとNode.jsで確認。",
+      "scope": "登録なしのローカル試作",
+      "tools": [
+        "MSW"
+      ],
+      "url": "https://kdevelope.pages.dev/experiments?view=skills#oss-msw-retry",
+      "before": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/network-before.png",
+        "label": "試す前の表示"
+      },
+      "after": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/network-after.png",
+        "label": "実行結果"
+      }
+    },
+    {
+      "id": "oss-budoux-wrap",
+      "title": "日本語の見出しを文節で改行する",
+      "group": "skills",
+      "summary": "320px幅で「画面で」が行をまたがず、元の文字列は変わらなかった。",
+      "scope": "登録なしのローカル試作",
+      "tools": [
+        "BudouX"
+      ],
+      "url": "https://kdevelope.pages.dev/experiments?view=skills#oss-budoux-wrap",
+      "before": {
+        "type": "text",
+        "text": "標準表示の折り返し\n道具の使い方と\n作例を同じ画面\nで見比べる",
+        "label": "試す前"
+      },
+      "after": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/wrap.png",
+        "label": "実行結果"
+      }
+    },
+    {
+      "id": "oss-yjs-merge",
+      "title": "別々に編集した制作メモを合流させる",
+      "group": "skills",
+      "summary": "編集Aと編集Bの結果に、目的と確認項目の両方が残った。",
+      "scope": "登録なしのローカル試作",
+      "tools": [
+        "Yjs"
+      ],
+      "url": "https://kdevelope.pages.dev/experiments?view=skills#oss-yjs-merge",
+      "before": {
+        "type": "text",
+        "text": "編集A 目的「日本語で作例を探す」\n編集B 確認「手順で検索する」",
+        "label": "試す前"
+      },
+      "after": {
+        "type": "image",
+        "url": "https://kdevelope.pages.dev/assets/experiments/oss-starter-trials/merge.png",
+        "label": "実行結果"
+      }
+    },
     {
       "id": "xnew-pixelfx-acting",
       "title": "12種類の攻撃をキャラクターの動きと合わせる",

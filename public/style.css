@@ -80,6 +80,15 @@ small { color: var(--muted); }
 .candidate-examples .text-action { min-height: 36px; font-size: .86rem; }
 .pager { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; padding: 12px 0; font-size: .86rem; }
 .stack-empty, .empty { color: var(--muted); margin: 10px 0; }
+.stack-overview { margin-top: 9px; }
+.stack-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 5px; background: var(--line); overflow: hidden; }
+.stack-stage { min-width: 0; padding: 7px; background: #f7f9fa; }
+.stack-stage-title { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; font-size: .8rem; font-weight: 700; color: var(--blue); }
+.stack-stage-title svg { width: 17px; flex: 0 0 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.stack-stage .meta { margin: 5px 3px; }
+.stack-jump { display: flex; gap: 6px; align-items: center; width: 100%; min-height: 40px; margin-bottom: 4px; padding: 4px 5px; text-align: left; font-size: .82rem; overflow-wrap: anywhere; }
+.stack-jump-icon { color: var(--blue); flex: 0 0 14px; text-align: center; }
+@media (max-width: 480px) { .stack-stages { grid-template-columns: 1fr; } }
 .stack-item { border: 1px solid var(--line); border-radius: 5px; margin-top: 8px; }
 .stack-row { display: grid; grid-template-columns: 34px minmax(0,1fr) auto auto; gap: 8px; align-items: center; padding: 7px 10px; }
 .role-icon { display: grid; place-items: center; background: var(--tint); color: var(--blue); border-radius: 5px; min-height: 32px; font-weight: 700; }

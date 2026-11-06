@@ -2,7 +2,7 @@ const origin = 'https://kdevelope.pages.dev';
 
 export const roles = {
   frontend: '画面', build: 'ビルド', language: '言語', style: 'スタイル', ui: 'UI部品', api: 'API', fetch: 'データ取得',
-  hosting: '公開先', database: 'データ保存', writing: '日本語・文章',
+  hosting: '公開先', database: 'データ保存', search: '検索', writing: '日本語・文章',
   image: '画像・素材', motion: '映像・動き', test: '検証', general: '制作支援'
 };
 

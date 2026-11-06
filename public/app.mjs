@@ -5,7 +5,13 @@ const $ = selector => document.querySelector(selector);
 const storageKey = 'kdevelope-compose-v1';
 const pageSize = 6;
 const roleIcons = { frontend: '▱', hosting: '☁', database: '▤', writing: 'あ', image: '▦', motion: '▶',
-  style: '◐', ui: '□', build: '▣', language: '型', api: '↔', fetch: '↓', test: '✓', general: '◇' };
+  style: '◐', ui: '□', build: '▣', language: '型', api: '↔', fetch: '↓', search: '⌕', test: '✓', general: '◇' };
+const stackGroups = [
+  { label: '制作', path: 'M4 4h16v13H4z M8 21h8 M12 17v4' },
+  { label: '処理・保存', path: 'M5 6a7 3 0 0 0 14 0a7 3 0 0 0-14 0v12a7 3 0 0 0 14 0V6 M5 12a7 3 0 0 0 14 0' },
+  { label: '公開・確認', path: 'M7 18h11a4 4 0 0 0 0-8h-1a5 5 0 0 0-10 1 4 4 0 0 0 0 7z M10 14l2 2 3-4' }
+];
+const stackGroupFor = { api: 1, fetch: 1, database: 1, search: 1, hosting: 2, test: 2 };
 const filter = { source: 'catalog', page: 0 };
 let catalog;
 let draft = structuredClone(blankDraft);
@@ -236,8 +242,45 @@ function exampleRow(example) {
   return row;
 }
 
+function groupIcon(path) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  const lines = document.createElementNS(ns, 'path');
+  lines.setAttribute('d', path);
+  svg.append(lines);
+  return svg;
+}
+
+function renderStackOverview(groups) {
+  const overview = $('#stack-overview');
+  overview.replaceChildren();
+  overview.hidden = groups.every(items => !items.length);
+  if (overview.hidden) return;
+  const stages = element('ul', undefined, 'stack-stages');
+  stages.setAttribute('aria-label', '道具の役割');
+  for (const [i, group] of stackGroups.entries()) {
+    const stage = element('li', undefined, 'stack-stage');
+    const heading = element('div', undefined, 'stack-stage-title');
+    heading.append(groupIcon(group.path), element('span', group.label));
+    stage.append(heading);
+    if (!groups[i].length) stage.append(element('p', '未選択', 'meta'));
+    for (const { tool, card } of groups[i]) {
+      const button = action(tool.name, () => card.focus(), 'stack-jump');
+      const icon = element('span', roleIcons[tool.role], 'stack-jump-icon');
+      icon.setAttribute('aria-hidden', 'true');
+      button.prepend(icon);
+      stage.append(button);
+    }
+    stages.append(stage);
+  }
+  overview.append(stages);
+}
+
 function renderStack() {
   const list = $('#stack');
+  const groups = stackGroups.map(() => []);
   list.replaceChildren();
   const anchor = element('div');
   anchor.id = 'stack-heading';
@@ -248,6 +291,8 @@ function renderStack() {
     const tool = tools.get(item.id);
     if (!tool) continue;
     const card = element('article', undefined, 'stack-item');
+    card.tabIndex = -1;
+    groups[stackGroupFor[tool.role] ?? 0].push({ tool, card });
     const row = element('div', undefined, 'stack-row');
     const icon = element('span', roleIcons[tool.role], 'role-icon');
     icon.setAttribute('aria-hidden', 'true');
@@ -289,6 +334,7 @@ function renderStack() {
     card.append(row, details);
     list.append(card);
   }
+  renderStackOverview(groups);
   const notes = scopeNotes(draft, tools);
   renderSublist('#scope-notes', '公開・保存の確認', notes.map(text => element('li', text)));
   renderSublist('#reference-list', '参考作例', draft.references.map(id => {
