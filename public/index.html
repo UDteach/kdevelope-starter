@@ -40,40 +40,47 @@
     <section id="step-1" aria-labelledby="purpose-title" hidden>
       <h2 id="purpose-title" tabindex="-1">作りたいものを決める</h2>
       <div class="purpose-layout">
-        <section class="stack-intro" aria-labelledby="stack-intro-title">
-          <h3 id="stack-intro-title">技術スタックの見本</h3>
-          <div class="intro-switch" role="group" aria-label="構成例を選ぶ">
-            <button type="button" data-stack-example="gallery" aria-pressed="true">作品集</button>
-            <button type="button" data-stack-example="shared" aria-pressed="false">共有メモ</button>
-          </div>
-          <div class="intro-result" aria-live="polite">
-            <p id="stack-example-summary"></p>
-            <ul class="intro-tools" id="stack-example-tools"></ul>
-          </div>
-          <div class="intro-actions">
-            <button type="button" id="use-example">この見本で始める</button>
-            <a href="#goal" id="write-goal">自分で入力する</a>
-          </div>
-        </section>
         <form id="purpose-form" class="narrow">
-          <label for="goal">何を作りますか？</label>
-          <textarea id="goal" rows="3" maxlength="1600" required placeholder="例　ピクセル素材と再現手順を見られるギャラリー"></textarea>
-          <label for="purpose">作るものの種類</label>
+          <label for="purpose">何を作りますか？</label>
           <select id="purpose">
-            <option value="site">作品サイト・ブログ</option><option value="app">Webアプリ</option>
+            <option value="landing">1ページの案内・リンク集</option><option value="site" selected>作品サイト・ブログ</option>
+            <option value="app">操作や入力があるWebアプリ</option>
             <option value="art">画像・動画</option><option value="writing">文章・制作手順</option>
           </select>
-          <fieldset id="web-needs">
-            <legend>Webで使う範囲</legend>
-            <div class="fields">
-              <div><label for="host">公開先の希望</label><select id="host"><option value="auto">目的から候補を出す</option><option value="local">ローカルで試作</option><option value="pages">Cloudflare Pages</option><option value="workers">Cloudflare Workers</option><option value="vercel">Vercel</option></select></div>
-              <div><label for="storage">データの保存範囲</label><select id="storage"><option value="none">保存は不要</option><option value="local">この端末に保存</option><option value="shared">端末間で共有</option></select></div>
+          <a id="show-stack-fit" href="#stack-fit-title" aria-label="おすすめを見る" aria-describedby="stack-fit-label">
+            <strong>いまのおすすめ</strong><span id="stack-fit-label"></span><span class="fit-link-text">理由を見る ↓</span>
+          </a>
+          <details class="fit-details" id="stack-examples">
+            <summary>見本から入力する</summary>
+            <div class="intro-switch" role="group" aria-label="構成例を選ぶ">
+              <button type="button" data-stack-example="gallery" aria-pressed="true">作品集</button>
+              <button type="button" data-stack-example="shared" aria-pressed="false">共有メモ</button>
             </div>
-            <label class="check"><input id="api" type="checkbox"> サーバー側の処理がある（API・送信フォームなど）</label>
-            <label class="check"><input id="login" type="checkbox"> 利用者のログインがある</label>
+            <div class="intro-result" aria-live="polite">
+              <p id="stack-example-summary"></p>
+              <ul class="intro-tools" id="stack-example-tools"></ul>
+            </div>
+            <button type="button" id="use-example">この見本で始める</button>
+          </details>
+          <fieldset id="web-needs">
+            <legend>必要なこと</legend>
+            <label for="storage">入力した内容をどこに残しますか？</label>
+            <select id="storage"><option value="none">残さない</option><option value="local">この端末に残す</option><option value="shared">別の端末からも見られるようにする</option></select>
+            <label class="check"><input id="api" type="checkbox"> 問い合わせを受け付けたり、外部のデータを取得したりする</label>
+            <label class="check"><input id="login" type="checkbox"> 利用者がログインして使う</label>
+            <details class="fit-details" id="host-options">
+              <summary>公開先を指定する（任意）</summary>
+              <label for="host">公開先の希望</label><select id="host"><option value="auto">目的からおすすめを出す</option><option value="local">自分のPCだけで試作</option><option value="pages">Cloudflare Pages</option><option value="workers">Cloudflare Workers</option><option value="vercel">Vercel</option></select>
+            </details>
           </fieldset>
-          <div class="actions"><button class="primary" type="submit">候補と作例へ →</button></div>
+          <label for="goal">作りたいものをもう少し詳しく（任意）</label>
+          <textarea id="goal" rows="2" maxlength="1600" placeholder="例　ピクセル素材と再現手順を見られるギャラリー"></textarea>
         </form>
+        <section class="stack-intro" aria-labelledby="stack-fit-title">
+          <h3 id="stack-fit-title" tabindex="-1">いまのおすすめ</h3>
+          <div id="stack-fit-preview" aria-live="polite"></div>
+          <div class="actions"><button class="primary" type="submit" form="purpose-form">候補と作例へ →</button></div>
+        </section>
       </div>
     </section>
 

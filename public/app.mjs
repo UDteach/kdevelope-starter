@@ -1,5 +1,5 @@
 import { roles } from './catalog.mjs';
-import { addSelection, blankDraft, findTools, isWeb, makePrompt, purposes, recommendations, scopeNotes } from './planner.mjs';
+import { addSelection, blankDraft, findTools, goalText, isWeb, makePrompt, purposes, recommendationContext, recommendations, scopeNotes } from './planner.mjs';
 import { svgIcon, toolIcon } from './icons.mjs';
 
 const $ = selector => document.querySelector(selector);
@@ -81,7 +81,7 @@ function restore() {
     }
     if (Array.isArray(saved.references)) draft.references = saved.references.filter(id => examples.has(id));
     if (Array.isArray(saved.comparison)) draft.comparison = saved.comparison.filter(id => tools.get(id)?.price === 'paid');
-    if (draft.goal.trim() && [1, 2, 3, 4].includes(saved.step)) draft.step = saved.step;
+    if ([1, 2, 3, 4].includes(saved.step)) draft.step = saved.step;
   } catch { /* A stale draft can be ignored. */ }
 }
 
@@ -122,19 +122,18 @@ function syncForm() {
 function renderNav() {
   document.querySelectorAll('[data-step]').forEach(button => {
     const step = Number(button.dataset.step);
-    button.disabled = step > 1 && !draft.goal.trim();
+    button.disabled = step > 2 && draft.step === 1 && !draft.goal.trim();
     if (step === draft.step) button.setAttribute('aria-current', 'step');
     else button.removeAttribute('aria-current');
   });
 }
 
 function go(step, focus = true) {
-  if (step > 1 && !draft.goal.trim()) step = 1;
   draft.step = step;
   for (const n of [1, 2, 3, 4]) $(`#step-${n}`).hidden = n !== step;
   renderNav();
   if (step === 2) {
-    $('#goal-summary').textContent = draft.goal.trim();
+    $('#goal-summary').textContent = goalText(draft);
     renderRecommendations();
     renderCandidates();
     renderStack();
@@ -171,19 +170,34 @@ function renderStackExample() {
   });
 }
 
+function fitContent(suggestions) {
+  const { reason, checks } = recommendationContext(draft);
+  const intro = element('p', reason, 'fit-reason');
+  const list = element('ul', undefined, 'intro-tools');
+  list.append(...technologyRows(suggestions));
+  if (!checks.length) return [intro, list];
+  const notes = element('ul', undefined, 'fit-checks');
+  notes.append(...checks.map(check => element('li', check)));
+  return [intro, list, notes];
+}
+
+function renderFitPreview() {
+  const suggestions = recommendations(draft).filter(item => tools.has(item.id));
+  $('#stack-fit-label').textContent = suggestions.map(item => tools.get(item.id).name).join(' · ');
+  $('#stack-fit-preview').replaceChildren(...fitContent(suggestions));
+}
+
 function renderRecommendations() {
   const panel = $('#recommendation');
   const suggestions = recommendations(draft).filter(item => tools.has(item.id));
   panel.hidden = suggestions.length === 0;
   if (panel.hidden) return;
-  const list = element('ul', undefined, 'intro-tools');
-  list.append(...technologyRows(suggestions));
   const apply = action('この構成を追加', () => {
     for (const item of suggestions) addSelection(draft, tools.get(item.id), item.scope, item.mode);
     updateChoices('目的に合う構成を追加しました。');
   });
   apply.disabled = suggestions.every(item => draft.selected.some(s => s.id === item.id));
-  panel.replaceChildren(element('h3', '目的に合う構成'), list, apply);
+  panel.replaceChildren(element('h3', 'おすすめの構成'), ...fitContent(suggestions), apply);
 }
 
 function updateChoices(message) {
@@ -446,6 +460,7 @@ function connectControls() {
       if (id === 'goal') renderNav();
       if (id === 'purpose') $('#web-needs').hidden = !isWeb(draft);
       if (id === 'research') $('#question').hidden = !draft.research;
+      if (['purpose', 'host', 'storage', 'api', 'login'].includes(id)) renderFitPreview();
       save();
     });
   }
@@ -454,18 +469,24 @@ function connectControls() {
     renderStackExample();
   }));
   renderStackExample();
+  $('#host-options').open = draft.host !== 'auto';
+  renderFitPreview();
   $('#use-example').addEventListener('click', () => {
     const { goal, purpose, storage } = stackExamples[stackExample].settings;
     Object.assign(draft, { purpose, storage, host: 'auto', api: false, login: false });
     if (!draft.goal.trim()) draft.goal = goal;
     syncForm();
     renderNav();
+    renderFitPreview();
     save();
     $('#goal').focus();
     say('見本の設定を入力しました。');
   });
-  $('#write-goal').addEventListener('click', event => { event.preventDefault(); $('#goal').focus(); });
-  $('#purpose-form').addEventListener('submit', event => { event.preventDefault(); go(2); });
+  $('#show-stack-fit').addEventListener('click', event => { event.preventDefault(); $('#stack-fit-title').focus(); });
+  $('#purpose-form').addEventListener('submit', event => {
+    event.preventDefault();
+    go(2);
+  });
   document.querySelectorAll('[data-step], [data-go]').forEach(button => button.addEventListener('click', () => go(Number(button.dataset.step || button.dataset.go))));
   document.querySelectorAll('[data-source]').forEach(button => button.addEventListener('click', () => {
     filter.source = button.dataset.source;

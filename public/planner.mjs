@@ -1,18 +1,22 @@
 import { roles } from './catalog.mjs';
 
 export const starterUrl = 'https://github.com/UDteach/kdevelope-starter';
-export const purposes = { site: '作品サイト・ブログ', app: 'Webアプリ', art: '画像・動画', writing: '文章・制作手順' };
+export const purposes = { landing: '1ページの案内・リンク集', site: '作品サイト・ブログ', app: '操作や入力があるWebアプリ', art: '画像・動画', writing: '文章・制作手順' };
 export const blankDraft = {
   step: 1, goal: '', purpose: 'site', host: 'auto', storage: 'none', api: false, login: false,
   selected: [], references: [], comparison: [], research: false, question: '', assistant: 'Codex', direction: ''
 };
 
 export function isWeb(draft) {
-  return draft.purpose === 'site' || draft.purpose === 'app';
+  return ['landing', 'site', 'app'].includes(draft.purpose);
 }
 
 export function needsServer(draft) {
   return isWeb(draft) && (draft.api || draft.login || draft.storage === 'shared');
+}
+
+export function goalText(draft) {
+  return draft.goal.trim() || `${purposes[draft.purpose]}を作る。`;
 }
 
 export function recommendations(draft) {
@@ -22,15 +26,18 @@ export function recommendations(draft) {
 
   const server = needsServer(draft);
   const hosting = draft.host === 'auto'
-    ? (server ? (draft.storage === 'shared' ? 'workers' : 'vercel') : 'pages')
+    ? (draft.storage === 'shared' ? 'workers' : draft.login ? 'vercel' : 'pages')
     : draft.host;
   const result = [];
-  if (hosting === 'vercel' && (server || draft.purpose === 'app')) {
+  if (hosting === 'vercel' && server && (draft.purpose === 'app' || draft.login)) {
     result.push({ id: 'R81', reason: '画面とサーバー側の処理を同じWebアプリで組めます。' });
+  } else if (draft.purpose === 'landing') {
+    result.push({ id: 'html-css', reason: '案内の見出し、画像、リンクを1ページにまとめられます。' });
+  } else if (draft.purpose === 'site') {
+    result.push({ id: 'R80', reason: '記事や作例が中心なので、一覧と詳細を持つサイトに向きます。' });
   } else {
-    result.push(draft.purpose === 'site'
-      ? { id: 'R80', reason: '記事や作例が中心なので、一覧と詳細を持つサイトに向きます。' }
-      : { id: 'R74', reason: '入力や表示の状態を持つ画面を部品に分けて作れます。' });
+    result.push({ id: 'R74', reason: '入力や表示の状態を持つ画面を部品に分けて作れます。' },
+      { id: 'R84', reason: 'Reactの画面を、公開先へ置けるファイルにまとめます。' });
   }
   if (hosting === 'pages') {
     result.push({ id: 'cloudflare-pages', reason: server ? '画面を配信し、APIはPages Functionsに置きます。' : 'ビルド済みのページと素材を公開できます。',
@@ -45,6 +52,27 @@ export function recommendations(draft) {
       scope: `共有データを保存し、${hosting === 'workers' ? 'Workers' : 'Pages Functions'}のバインディングから読み書きする。` });
   }
   return result;
+}
+
+export function recommendationContext(draft) {
+  if (!isWeb(draft)) return {
+    reason: draft.purpose === 'art' ? 'まず出力したい絵や動画の形式から道具を選びます。' : '文章を書く工程と、書いた文章を整える工程に分けて選べます。',
+    checks: []
+  };
+
+  const server = needsServer(draft);
+  const reason = draft.storage === 'shared' ? '別の端末でも同じ内容を開くため、データの保存先と読み書きする処理を決めます。'
+    : draft.login ? 'ログインの状態を確認し、利用者ごとに使える範囲を分ける構成です。'
+    : draft.api ? '公開する画面に、フォームの送信などを受け付ける処理を足します。'
+    : draft.host === 'local' ? '自分のPCで画面や操作を確かめる構成です。公開先はあとで選べます。'
+    : draft.storage === 'local' ? '入力した内容はこの端末のブラウザーに保存します。画面は静的ファイルとして配信できます。'
+    : '見る人にページを届けるための構成です。画面は静的ファイルとして配信できます。';
+  const checks = [];
+  if (draft.host === 'local' && server) checks.push('この構成では画面から試します。共有やログインを使う段階で、サーバー側の実行環境と保存先を決めます。');
+  if (draft.host === 'vercel' && draft.storage === 'shared') checks.push('Vercelは画面と処理を担当します。共有データの保存先は別に選びます。');
+  if (draft.login) checks.push('ログイン方法と、利用者ごとに見られるデータを決めます。');
+  if (draft.api && draft.storage === 'none') checks.push('フォームを使う場合は、送信した内容の受け取り方も決めます。');
+  return { reason, checks };
 }
 
 export function addSelection(draft, tool, scope = tool.scope, mode = 'required') {
@@ -109,7 +137,7 @@ function section(title, lines) {
 
 export function makePrompt(draft, tools, examples, kind = 'build') {
   const visuals = kind === 'image';
-  const goal = draft.goal.trim();
+  const goal = goalText(draft);
   const intro = visuals
     ? `${draft.assistant}で制作前の方向を相談します。次の条件と参考作例を読み、比較できる画像案を2案出してください。画像出力が使えない場合は、各案の画像生成用プロンプトを出してください。案ごとの違いと、選ぶ前に確認したい点を添えてください。`
     : '次の要件から制作を進めてください。まず既存リポジトリと公式資料を確認し、必須条件、費用、実行環境に矛盾があれば制作前に示してください。';

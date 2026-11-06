@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { addSelection, blankDraft, findTools, makePrompt, recommendations, scopeNotes } from '../public/planner.mjs';
+import { addSelection, blankDraft, findTools, goalText, makePrompt, recommendationContext, recommendations, scopeNotes } from '../public/planner.mjs';
 
 const catalog = JSON.parse(await readFile(new URL('../public/catalog.json', import.meta.url), 'utf8'));
 const tools = new Map(catalog.tools.map(tool => [tool.id, tool]));
@@ -13,13 +13,32 @@ const ids = items => items.map(item => item.id);
 
 test('公開する静的な作品集と、共有データを扱うWebアプリの範囲が分かれる', () => {
   assert.deepEqual(ids(recommendations(draft())), ['R80', 'cloudflare-pages']);
-  assert.deepEqual(ids(recommendations(draft({ purpose: 'app', storage: 'shared' }))), ['R74', 'cloudflare-workers', 'cloudflare-d1']);
+  assert.deepEqual(ids(recommendations(draft({ purpose: 'app', storage: 'shared' }))), ['R74', 'R84', 'cloudflare-workers', 'cloudflare-d1']);
   assert.deepEqual(ids(recommendations(draft({ purpose: 'app', api: true, host: 'vercel' }))), ['R81', 'vercel']);
   assert.ok(!ids(recommendations(draft({ purpose: 'art', storage: 'shared', host: 'workers' }))).includes('cloudflare-d1'));
   const storage = draft({ storage: 'shared', host: 'pages' });
   const suggestions = recommendations(storage);
   assert.match(suggestions.find(item => item.id === 'cloudflare-pages').scope, /Pages Functions/);
   assert.match(suggestions.find(item => item.id === 'cloudflare-d1').scope, /バインディング/);
+});
+
+test('一枚の案内、フォーム、端末内保存、公開先指定でおすすめが変わる', () => {
+  const landing = draft({ purpose: 'landing' });
+  assert.deepEqual(ids(recommendations(landing)), ['html-css', 'cloudflare-pages']);
+  assert.match(recommendations({ ...landing, api: true })[1].scope, /Pages Functions/);
+  assert.match(recommendationContext({ ...landing, api: true }).checks[0], /受け取り方/);
+  const browserApp = draft({ purpose: 'app', storage: 'local', host: 'vercel' });
+  assert.deepEqual(ids(recommendations(browserApp)), ['R74', 'R84', 'vercel']);
+  assert.match(recommendationContext(browserApp).reason, /この端末/);
+  const hostedApp = { ...browserApp, storage: 'shared', login: true };
+  assert.deepEqual(ids(recommendations(hostedApp)), ['R81', 'vercel']);
+  assert.match(recommendationContext(hostedApp).checks.join(' '), /保存先は別に選びます.*利用者ごと/);
+  const localTrial = { ...hostedApp, host: 'local' };
+  assert.deepEqual(ids(recommendations(localTrial)), ['R74', 'R84']);
+  assert.match(recommendationContext(localTrial).checks[0], /サーバー側の実行環境/);
+  const optionalGoal = { ...landing, goal: '' };
+  assert.match(goalText(optionalGoal), /1ページの案内/);
+  assert.ok(makePrompt(optionalGoal, tools, examples).includes(goalText(optionalGoal)));
 });
 
 test('有料候補はチェックで現れ、実装スタックに入らない', () => {
